@@ -1,0 +1,32 @@
+| Day | Topics                                                  | Focus Area                            |
+| --- | ------------------------------------------------------- | ------------------------------------- |
+| 1   | Time Complexity Analysis, Big O Basics                  | Intro & Foundations                   |
+| 2   | Arrays – Basics, Traversal, Sum, Max/Min, Reversal      | Easy Level - Arrays                   |
+| 3   | Arrays – Sorting, Searching (Linear, Binary)            | Searching + Sorting                   |
+| 4   | Arrays – Sliding Window, Two Pointers                   | Problem Solving                       |
+| 5   | Strings – Basics, Reversal, Palindromes                 | Easy Level - Strings                  |
+| 6   | Strings – Frequency Count, Anagram                      | Practice & Hashing Intro              |
+| 7   | Linked Lists – Single, Insertion, Deletion              | Easy Level - Linked List              |
+| 8   | Linked Lists – Reversal, Middle, Cycle                  | Problem Solving                       |
+| 9   | Stacks – Using Array/LL, Basic Problems                 | Easy Level - Stack                    |
+| 10  | Queues – Basic, Circular, Deque                         | Easy Level - Queue                    |
+| 11  | Recursion – Factorial, Fibonacci, Sum                   | Easy Level - Recursion                |
+| 12  | Recursion – Backtracking Intro, Subsets                 | Medium Level - Transition             |
+| 13  | Hashing – Basics, Frequency Maps                        | Easy Level - Hashing                  |
+| 14  | Hashing – Count Pairs, Intersection                     | Problem Solving                       |
+| 15  | Basic Graph Algorithms – BFS                            | Easy Level - Graph                    |
+| 16  | Basic Graph Algorithms – DFS                            | Easy Level - Graph                    |
+| 17  | Trees – Binary Trees (Basics + Traversal)               | Medium Level - Trees                  |
+| 18  | Trees – Binary Search Tree (Insert/Delete/Search)       | BST Practice                          |
+| 19  | Trees – Balanced Trees, AVL Concepts                    | Concept Building                      |
+| 20  | Advanced Sorting – Merge Sort                           | Medium Level - Sorting                |
+| 21  | Advanced Sorting – Quick Sort                           | Practice                              |
+| 22  | Advanced Searching – Binary Search on Answer            | Medium Level - Searching              |
+| 23  | Dynamic Programming – Intro, Fibonacci, Climbing Stairs | Medium Level - DP                     |
+| 24  | DP – 0/1 Knapsack, Subset Sum                           | Medium Level - DP                     |
+| 25  | Backtracking – N-Queens, Rat in a Maze                  | Medium Level - Backtracking           |
+| 26  | Graph – Dijkstra’s Algorithm                            | Medium Level - Graph Algorithms       |
+| 27  | Graph – Bellman-Ford Algorithm                          | Problem Solving                       |
+| 28  | Heap – Min/Max Heap, Heapify                            | Medium Level - Heap                   |
+| 29  | Priority Queue, Red-Black Tree Concept (overview)       | Advanced Data Structure (Basics only) |
+| 30  | Revision + Solve 5 Interview Style Problems             | Wrap-up + Practice                    |
