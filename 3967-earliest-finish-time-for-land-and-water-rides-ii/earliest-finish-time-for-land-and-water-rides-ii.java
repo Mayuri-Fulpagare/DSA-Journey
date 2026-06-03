@@ -1,87 +1,88 @@
-import java.util.Arrays;
-
 class Solution {
-    int minFinish;
+    private static final int INF = 1000000000; // Safe infinity
+    
+    // Static arrays are allocated ONCE per JVM, meaning zero Garbage Collection delays!
+    private static final int[] minLandDur = new int[100005];
+    private static final int[] minWaterDur = new int[100005];
+    private static final int[] preMinSecondDur = new int[100005];
+    private static final int[] sufMinSecondFinish = new int[100005];
 
     public int earliestFinishTime(int[] landStartTime, int[] landDuration, int[] waterStartTime, int[] waterDuration) {
-        int n = landStartTime.length;
-        int m = waterStartTime.length;
+        int maxLandStart = 0;
+        int maxWaterStart = 0;
         
-        // Pack start time and duration into a single 64-bit primitive long
-        long[] land = new long[n];
-        for (int i = 0; i < n; i++) {
-            land[i] = ((long) landStartTime[i] << 32) | landDuration[i];
+        // Find maximum boundaries so we only iterate as far as we need to
+        for (int t : landStartTime) {
+            if (t > maxLandStart) maxLandStart = t;
+        }
+        for (int t : waterStartTime) {
+            if (t > maxWaterStart) maxWaterStart = t;
         }
         
-        long[] water = new long[m];
-        for (int i = 0; i < m; i++) {
-            water[i] = ((long) waterStartTime[i] << 32) | waterDuration[i];
+        // Only clear up to the max starts for this specific test case
+        for (int i = 0; i <= maxLandStart; i++) minLandDur[i] = INF;
+        for (int i = 0; i <= maxWaterStart; i++) minWaterDur[i] = INF;
+        
+        // Bucket map the durations (storing only the fastest duration per start time)
+        for (int i = 0; i < landStartTime.length; i++) {
+            int st = landStartTime[i];
+            int dur = landDuration[i];
+            if (dur < minLandDur[st]) {
+                minLandDur[st] = dur;
+            }
         }
         
-        // Sorting primitive arrays is incredibly fast compared to object arrays
-        Arrays.sort(land);
-        Arrays.sort(water);
+        for (int i = 0; i < waterStartTime.length; i++) {
+            int st = waterStartTime[i];
+            int dur = waterDuration[i];
+            if (dur < minWaterDur[st]) {
+                minWaterDur[st] = dur;
+            }
+        }
         
-        minFinish = Integer.MAX_VALUE;
+        int ans1 = solve(minLandDur, minWaterDur, maxLandStart, maxWaterStart);
+        int ans2 = solve(minWaterDur, minLandDur, maxWaterStart, maxLandStart);
         
-        // Pre-allocate to prevent multiple memory allocations in our helper method
-        int maxLen = Math.max(n, m);
-        int[] preMinDuration = new int[maxLen];
-        int[] sufMinFinish = new int[maxLen];
-        
-        checkOrder(land, water, preMinDuration, sufMinFinish);
-        checkOrder(water, land, preMinDuration, sufMinFinish);
-        
-        return minFinish;
+        return ans1 < ans2 ? ans1 : ans2;
     }
     
-    private void checkOrder(long[] first, long[] second, int[] preMinDuration, int[] sufMinFinish) {
-        int m = second.length;
-        
-        // (int) second[i] extracts the bottom 32 bits (duration)
-        // (int) (second[i] >>> 32) extracts the top 32 bits (startTime)
-        
-        preMinDuration[0] = (int) second[0];
-        for (int i = 1; i < m; i++) {
-            int dur = (int) second[i];
-            preMinDuration[i] = preMinDuration[i-1] < dur ? preMinDuration[i-1] : dur;
+    // Extremely fast linear scan logic
+    private int solve(int[] firstDur, int[] secondDur, int maxFirstStart, int maxSecondStart) {
+        preMinSecondDur[0] = secondDur[0];
+        for (int i = 1; i <= maxSecondStart; i++) {
+            preMinSecondDur[i] = preMinSecondDur[i-1] < secondDur[i] ? preMinSecondDur[i-1] : secondDur[i];
         }
         
-        int lastStart = (int) (second[m-1] >>> 32);
-        int lastDur = (int) second[m-1];
-        sufMinFinish[m-1] = lastStart + lastDur;
-        
-        for (int i = m - 2; i >= 0; i--) {
-            int start = (int) (second[i] >>> 32);
-            int dur = (int) second[i];
-            int finish = start + dur;
-            sufMinFinish[i] = sufMinFinish[i+1] < finish ? sufMinFinish[i+1] : finish;
+        sufMinSecondFinish[maxSecondStart] = secondDur[maxSecondStart] != INF ? maxSecondStart + secondDur[maxSecondStart] : INF;
+        for (int i = maxSecondStart - 1; i >= 0; i--) {
+            int finish = secondDur[i] != INF ? i + secondDur[i] : INF;
+            sufMinSecondFinish[i] = sufMinSecondFinish[i+1] < finish ? sufMinSecondFinish[i+1] : finish;
         }
         
-        for (int i = 0; i < first.length; i++) {
-            int finishFirst = (int) (first[i] >>> 32) + (int) first[i];
+        int minFinish = INF;
+        
+        // Check all start times sequentially
+        for (int i = 0; i <= maxFirstStart; i++) {
+            if (firstDur[i] == INF) continue;
             
-            // Binary search 
-            int left = 0, right = m;
-            while (left < right) {
-                int mid = (left + right) >>> 1;
-                if ((int) (second[mid] >>> 32) <= finishFirst) {
-                    left = mid + 1;
-                } else {
-                    right = mid;
+            int finishFirst = i + firstDur[i];
+            
+            // "pos" acts as an instant O(1) binary search alternative
+            int pos = finishFirst < maxSecondStart ? finishFirst : maxSecondStart;
+            
+            // Option 1: Second ride is already open 
+            if (preMinSecondDur[pos] != INF) {
+                int cand = finishFirst + preMinSecondDur[pos];
+                if (cand < minFinish) minFinish = cand;
+            }
+            
+            // Option 2: Second ride hasn't opened yet
+            if (pos + 1 <= maxSecondStart) {
+                if (sufMinSecondFinish[pos + 1] < minFinish) {
+                    minFinish = sufMinSecondFinish[pos + 1];
                 }
             }
-            
-            int pos = left - 1;
-            
-            if (pos >= 0) {
-                int cand1 = finishFirst + preMinDuration[pos];
-                if (cand1 < minFinish) minFinish = cand1;
-            }
-            if (pos + 1 < m) {
-                int cand2 = sufMinFinish[pos + 1];
-                if (cand2 < minFinish) minFinish = cand2;
-            }
         }
+        return minFinish;
     }
 }
