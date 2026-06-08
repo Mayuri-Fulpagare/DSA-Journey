@@ -1,21 +1,26 @@
 class Solution {
     public int[] pivotArray(int[] nums, int pivot) {
-        List<Integer> less    = new ArrayList<>();
-        List<Integer> equal   = new ArrayList<>();
-        List<Integer> greater = new ArrayList<>();
+        int lessCount = 0, equalCount = 0;
 
+        // Pass 1: count less and equal elements
         for (int num : nums) {
-            if      (num < pivot) less.add(num);
-            else if (num > pivot) greater.add(num);
-            else                  equal.add(num);
+            if      (num < pivot) lessCount++;
+            else if (num == pivot) equalCount++;
         }
 
-        int[] result = new int[nums.length];
-        int i = 0;
+        // Precompute start indices for each partition
+        int l = 0;                        // start of "less" section
+        int e = lessCount;                // start of "equal" section
+        int g = lessCount + equalCount;   // start of "greater" section
 
-        for (int num : less)    result[i++] = num;
-        for (int num : equal)   result[i++] = num;
-        for (int num : greater) result[i++] = num;
+        int[] result = new int[nums.length];
+
+        // Pass 2: place directly into result — no extra lists
+        for (int num : nums) {
+            if      (num < pivot)  result[l++] = num;
+            else if (num == pivot) result[e++] = num;
+            else                   result[g++] = num;
+        }
 
         return result;
     }
