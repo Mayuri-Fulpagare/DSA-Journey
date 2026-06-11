@@ -4,48 +4,50 @@ class Solution {
     public int assignEdgeWeights(int[][] edges) {
         int n = edges.length + 1;
 
-        int[] deg = new int[n + 1];
+        // CSR (Compressed Sparse Row) offset array setup
+        int[] head = new int[n + 2];
         for (int[] e : edges) {
-            deg[e[0]]++;
-            deg[e[1]]++;
+            head[e[0] + 1]++;
+            head[e[1] + 1]++;
+        }
+        for (int i = 1; i <= n + 1; i++) {
+            head[i] += head[i - 1];
         }
 
-        int[][] g = new int[n + 1][];
-        for (int i = 1; i <= n; i++) {
-            g[i] = new int[deg[i]];
-        }
-
-        int[] idx = new int[n + 1];
+        // Flat adjacency array construction
+        int[] adj = new int[2 * n - 2];
         for (int[] e : edges) {
             int u = e[0], v = e[1];
-            g[u][idx[u]++] = v;
-            g[v][idx[v]++] = u;
+            adj[head[u]++] = v;
+            adj[head[v]++] = u;
         }
 
+        // BFS traversal variables
         int[] depth = new int[n + 1];
-        boolean[] vis = new boolean[n + 1];
-
         int[] q = new int[n];
         int l = 0, r = 0;
+        
+        // Start BFS from root 1 (depth initialized to 1 to mark as visited)
         q[r++] = 1;
-        vis[1] = true;
-
-        int maxDepth = 0;
+        depth[1] = 1;
 
         while (l < r) {
             int u = q[l++];
-            maxDepth = Math.max(maxDepth, depth[u]);
-
-            for (int v : g[u]) {
-                if (!vis[v]) {
-                    vis[v] = true;
+            // u's neighbors are located at indices [head[u - 1], head[u])
+            int start = head[u - 1];
+            int end = head[u];
+            for (int i = start; i < end; i++) {
+                int v = adj[i];
+                if (depth[v] == 0) { // If unvisited
                     depth[v] = depth[u] + 1;
                     q[r++] = v;
                 }
             }
         }
 
-        return (int) modPow(2, maxDepth - 1);
+        // The last node in the queue (q[r - 1]) has the maximum depth.
+        // We subtract 2: 1 because depth was 1-based, and another 1 to convert from depth to path length.
+        return (int) modPow(2, depth[q[r - 1]] - 2);
     }
 
     private long modPow(long a, int b) {
