@@ -1,78 +1,54 @@
 class Solution {
+  public long findKthSmallest(int[] coins, int k) {
+    List<Long>[] sizeToLcms = getSizeToLcms(coins);
+    long l = 0;
+    long r = (long) k * Arrays.stream(coins).min().getAsInt();
 
-    public long findKthSmallest(int[] coins, int k) {
-        long low = 1;
-        long high = (long) coins[0] * k;
-
-        // The smallest coin gives an upper bound.
-        for (int coin : coins) {
-            high = Math.min(high, (long) coin * k);
-        }
-
-        while (low < high) {
-            long mid = low + (high - low) / 2;
-
-            if (count(mid, coins) >= k) {
-                high = mid;
-            } else {
-                low = mid + 1;
-            }
-        }
-
-        return low;
+    while (l < r) {
+      final long m = (l + r) / 2;
+      if (numDenominationsNoGreaterThan(sizeToLcms, m) >= k)
+        r = m;
+      else
+        l = m + 1;
     }
 
-    private long count(long x, int[] coins) {
-        int n = coins.length;
-        long result = 0;
+    return l;
+  }
 
-        // Inclusion-Exclusion
-        for (int mask = 1; mask < (1 << n); mask++) {
+  // Returns the number of denominations <= m.
+  private long numDenominationsNoGreaterThan(List<Long>[] sizeToLcms, long m) {
+    long res = 0;
+    for (int sz = 1; sz < sizeToLcms.length; ++sz)
+      for (long lcm : sizeToLcms[sz])
+        res += m / lcm * Math.pow(-1, sz + 1);
+    return res;
+  }
 
-            long lcm = 1;
-            int bits = 0;
-            boolean valid = true;
+  // Returns the LCMs for each number of combination of coins.
+  private List<Long>[] getSizeToLcms(int[] coins) {
+    final int n = coins.length;
+    final int maxMask = 1 << n;
+    List<Long>[] sizeToLcms = new List[n + 1];
 
-            for (int i = 0; i < n; i++) {
-                if ((mask & (1 << i)) != 0) {
-                    bits++;
+    for (int i = 1; i <= n; ++i)
+      sizeToLcms[i] = new ArrayList<>();
 
-                    lcm = lcm(lcm, coins[i]);
-
-                    // No multiple of this LCM can be <= x.
-                    if (lcm > x) {
-                        valid = false;
-                        break;
-                    }
-                }
-            }
-
-            if (!valid) {
-                continue;
-            }
-
-            long multiples = x / lcm;
-
-            if ((bits & 1) == 1) {
-                result += multiples;
-            } else {
-                result -= multiples;
-            }
-        }
-
-        return result;
+    for (int mask = 1; mask < maxMask; ++mask) {
+      long lcmOfSelectedCoins = 1;
+      for (int i = 0; i < n; ++i)
+        if ((mask >> i & 1) == 1)
+          lcmOfSelectedCoins = lcm(lcmOfSelectedCoins, coins[i]);
+      sizeToLcms[Integer.bitCount(mask)].add(lcmOfSelectedCoins);
     }
 
-    private long gcd(long a, long b) {
-        while (b != 0) {
-            long temp = a % b;
-            a = b;
-            b = temp;
-        }
-        return a;
-    }
+    return sizeToLcms;
+  }
 
-    private long lcm(long a, long b) {
-        return a / gcd(a, b) * b;
-    }
+  private long lcm(long a, long b) {
+    return a * b / gcd(a, b);
+  }
+
+  private long gcd(long a, long b) {
+    return b == 0 ? a : gcd(b, a % b);
+  }
 }
